@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -35,6 +36,29 @@ func (c *Course) isEmpty() bool {
 }
 
 func main() {
+	fmt.Println("welcome")
+	r := mux.NewRouter()
+	courses = append(courses, Course{CourseId: "2",
+CourseName: "mern stack",
+CoursePrice: 299,
+Author:&Author{Fullname: "nishanth"}},Course{CourseId: "4",
+CourseName: "finances",
+CoursePrice: 299,
+Author:&Author{Fullname: "nishanth"}})
+
+r.HandleFunc("/",serveHome).Methods("GET")
+r.HandleFunc("/courses",getAllcourses).Methods("GET")
+r.HandleFunc("/course/{id}",getCourse).Methods("GET")
+r.HandleFunc("/course",CreateOneCourse).Methods("POST")
+r.HandleFunc("/course/{id}",updateCourse).Methods("PUT")
+r.HandleFunc("/course/{id}",deleteCourse).Methods("DELETE")
+
+
+
+
+
+
+log.Fatal(http.ListenAndServe(":5000",r))
 
 }
 
@@ -53,6 +77,7 @@ func getAllcourses(w http.ResponseWriter, r *http.Request){
 func getCourse(w http.ResponseWriter, r *http.Request){
 	w.Header().Set("content-type","application/json")
 	params := mux.Vars(r)
+	fmt.Println(params)
 
 	for _,course := range courses{
 		if course.CourseId == params["id"]{
@@ -110,3 +135,21 @@ func updateCourse(w http.ResponseWriter, r *http.Request){
 
 
 }
+
+func deleteCourse(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("content-type","application/json")
+	params := mux.Vars(r)
+	for index,course := range courses{
+		if course.CourseId == params["id"]{
+			courses = append(courses[:index],courses[index+1:]... )
+			
+			json.NewEncoder(w).Encode("deleted sucessfully")
+			return
+
+		}
+	}
+
+	json.NewEncoder(w).Encode("invalid id ")
+}
+
+
